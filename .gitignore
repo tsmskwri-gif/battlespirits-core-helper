@@ -1,0 +1,14 @@
+# Keep local settings and signing keys out of the public repository.
+.DS_Store
+Thumbs.db
+local.properties
+keystore.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+.env
+.env.*
+.gradle/
+.idea/
+**/build/
