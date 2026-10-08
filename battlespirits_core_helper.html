@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#15131a" />
+<title>バトスピ 一人回しコアヘルパー</title>
+<style>
+  :root{
+    --bg:#111014; --panel:#1b1920; --panel2:#24212a; --text:#f5f2f8; --muted:#aaa3b1;
+    --line:#35303d; --danger:#e06b75; --ok:#80c98d; --accent:#b59cff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:system-ui,-apple-system,"Noto Sans JP","Yu Gothic UI",sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:auto;padding:14px 12px 40px}
+  h1{font-size:21px;margin:6px 0 4px}
+  .sub{font-size:13px;color:var(--muted);margin-bottom:12px}
+  .toolbar{
+    display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px
+  }
+  button, select, input{
+    font:inherit;
+  }
+  button{
+    border:1px solid var(--line); background:var(--panel2); color:var(--text);
+    border-radius:12px; padding:10px 12px; cursor:pointer;
+  }
+  button:active{transform:translateY(1px)}
+  .primary{background:#40345d;border-color:#6d58a1}
+  .danger{background:#4b262b;border-color:#7b3d45}
+  .small{padding:7px 10px;font-size:13px}
+  .players{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .player{
+    background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:12px;
+  }
+  .head{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+  .name{
+    flex:1; background:#121116;color:var(--text);border:1px solid var(--line);
+    border-radius:10px;padding:9px 10px;font-weight:700;min-width:0;
+  }
+  .badge{font-size:12px;color:var(--muted);white-space:nowrap}
+  .bigrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .counter{
+    background:#15131a;border:1px solid var(--line);border-radius:14px;padding:10px;
+  }
+  .label{font-size:12px;color:var(--muted);margin-bottom:4px}
+  .value{font-size:34px;font-weight:800;line-height:1.1;margin:2px 0 8px}
+  .ctrl{display:flex;gap:6px}
+  .ctrl button{flex:1;padding:8px}
+  .soul{
+    margin-top:8px;background:#15131a;border:1px solid var(--line);border-radius:14px;padding:10px;
+  }
+  .soulgrid{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+  select{
+    width:100%;background:#121116;color:var(--text);border:1px solid var(--line);
+    border-radius:10px;padding:9px
+  }
+  .turnbtn{
+    width:100%; margin-top:10px; font-size:17px; font-weight:800; padding:13px;
+  }
+  .quick{
+    margin-top:10px; display:grid; grid-template-columns:1fr 1fr; gap:7px;
+  }
+  .quick button{font-size:13px;padding:9px 7px}
+  .log{
+    margin-top:12px;background:#15131a;border:1px solid var(--line);border-radius:14px;padding:10px;
+  }
+  .logtitle{display:flex;justify-content:space-between;align-items:center}
+  .logitems{font-size:13px;color:#d7d2dc;max-height:150px;overflow:auto;margin-top:6px}
+  .logitems div{padding:5px 0;border-top:1px solid #27232d}
+  .hint{
+    margin-top:12px;padding:11px 12px;border:1px dashed #494252;border-radius:14px;
+    color:var(--muted);font-size:13px;line-height:1.55
+  }
+  .toast{
+    position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
+    background:#ece7f4;color:#18151d;padding:10px 14px;border-radius:999px;
+    font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.18s;
+    max-width:92vw;text-align:center;
+  }
+  .toast.show{opacity:1}
+  @media(max-width:720px){
+    .players{grid-template-columns:1fr}
+    .wrap{padding-bottom:28px}
+  }
+
+
+  .voidplus{
+    width:100%;
+    padding:4px 5px !important;
+    font-size:10px;
+    opacity:.78;
+  }
+  .mainmoves{
+    margin-top:10px;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+  }
+  .mainmoves button{
+    min-height:76px;
+    font-size:15px;
+    font-weight:800;
+    line-height:1.15;
+    padding:10px 6px;
+    background:#33294a;
+    border-color:#66508e;
+  }
+  .quick.secondary{
+    grid-template-columns:1fr;
+  }
+
+  @media (orientation: landscape) and (max-height: 760px){
+    .wrap{
+      max-width:none;
+      padding:6px 8px 20px;
+    }
+    h1,.sub,.toolbar{
+      display:none;
+    }
+    .players{
+      gap:8px;
+    }
+    .player{
+      padding:7px;
+      border-radius:12px;
+    }
+    .head{
+      margin-bottom:6px;
+      gap:6px;
+    }
+    .name{
+      padding:6px 8px;
+      font-size:15px;
+      border-radius:8px;
+    }
+    .badge{
+      font-size:11px;
+    }
+    .bigrow{
+      grid-template-columns:repeat(4,1fr);
+      gap:6px;
+    }
+    .counter{
+      padding:6px;
+      border-radius:10px;
+      min-width:0;
+    }
+    .label{
+      font-size:10px;
+      margin-bottom:1px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .value{
+      font-size:26px;
+      margin:0 0 4px;
+      line-height:1;
+      white-space:nowrap;
+    }
+    .ctrl{
+      gap:4px;
+    }
+    .ctrl button{
+      padding:5px 2px;
+      font-size:13px;
+      border-radius:8px;
+    }
+    .soul{
+      margin-top:6px;
+      padding:6px;
+      border-radius:10px;
+    }
+    .soulgrid{
+      gap:6px;
+    }
+    .soul .label{
+      font-size:10px;
+    }
+    select{
+      padding:5px 6px;
+      font-size:12px;
+      border-radius:8px;
+    }
+    .soulgrid > div:last-child{
+      font-size:18px !important;
+    }
+    .turnbtn{
+      margin-top:6px;
+      padding:8px;
+      font-size:14px;
+      border-radius:10px;
+    }
+    .quick{
+      margin-top:6px;
+      gap:5px;
+    }
+    .quick button{
+      padding:6px 4px;
+      font-size:11px;
+    }
+
+    .voidplus{
+      padding:3px 2px !important;
+      font-size:9px;
+    }
+    .mainmoves{
+      margin-top:6px;
+      grid-template-columns:repeat(5,1fr);
+      gap:5px;
+    }
+    .mainmoves button{
+      min-height:50px;
+      padding:5px 2px;
+      font-size:11px;
+      line-height:1.05;
+    }
+    .quick.secondary{
+      margin-top:5px;
+      grid-template-columns:1fr;
+      gap:5px;
+    }
+    .quick.secondary button{
+      padding:5px 3px;
+      font-size:10px;
+    }
+
+    .log{
+      margin-top:6px;
+      padding:6px;
+      border-radius:10px;
+    }
+    .logtitle,.logitems{
+      font-size:11px;
+    }
+    .logitems{
+      max-height:78px;
+    }
+    .hint{
+      display:none;
+    }
+  }
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>バトスピ 一人回しコアヘルパー</h1>
+  <div class="sub">2つのデッキを同時に回す用。状態は端末内に自動保存。</div>
+
+  <div class="toolbar">
+    <button class="primary" onclick="newGame()">新しい対戦</button>
+    <button onclick="swapFirst()">先攻を入れ替え</button>
+    <button class="danger" onclick="hardReset()">全部リセット</button>
+  </div>
+
+  <div id="players" class="players"></div>
+
+  <div class="hint">
+    <b>ターン開始</b>：トラッシュの通常コアをすべてリザーブへ戻し、コアステップで通常コア+1。
+    先攻の1ターン目だけコア+1を自動でスキップします。<br>
+    「1枚ドロー」「全カード回復」は物理カード側の処理なので、ボタンを押したときに画面下へリマインドを出します。<br>
+    ※ソウルコアは個数ではなく「今どこにあるか」だけ管理。カード上の細かいコア配分は実物コア／ダイス併用想定です。
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const ZONES = ["リザーブ","トラッシュ","フィールド","ライフ","ボイド"];
+const defaults = () => ({
+  name:["",""],
+  first:0,
+  p:[
+    {reserve:3,trash:0,field:0,life:5,soul:"リザーブ",turns:0,log:[]},
+    {reserve:3,trash:0,field:0,life:5,soul:"リザーブ",turns:0,log:[]}
+  ]
+});
+let state = load() || defaults();
+for (const p of state.p) {
+  if (p.soul === "場") p.soul = "フィールド";
+}
+
+function save(){ localStorage.setItem("bs-core-helper-v1",JSON.stringify(state)); }
+function displayName(i){return state.name[i] || `P${i+1}`;}
+function load(){
+  try{return JSON.parse(localStorage.getItem("bs-core-helper-v1"))}catch(e){return null}
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]))}
+function toast(msg){
+  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(window.__tt); window.__tt=setTimeout(()=>t.classList.remove("show"),2200);
+}
+function log(i,msg){
+  const d=new Date(); const time=d.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});
+  state.p[i].log.unshift(`${time} ${msg}`); state.p[i].log=state.p[i].log.slice(0,20);
+}
+function clamp(n){return Math.max(0,Number(n)||0)}
+function adj(i,key,delta){
+  state.p[i][key]=clamp(state.p[i][key]+delta);
+  log(i,`${labelOf(key)} ${delta>0?"+":""}${delta}`);
+  save(); render();
+}
+function labelOf(k){return ({reserve:"リザーブ",trash:"トラッシュ",field:"場コア",life:"ライフ"})[k]||k}
+function move(i,from,to,amount=1){
+  if(state.p[i][from] < amount){toast(`${displayName(i)}：${labelOf(from)}が足りない`);return}
+  state.p[i][from]-=amount; state.p[i][to]+=amount;
+  log(i,`${labelOf(from)} → ${labelOf(to)} ×${amount}`);
+  save(); render();
+}
+function turnStart(i){
+  const p=state.p[i];
+  p.turns++;
+
+  if(p.trash>0){
+    const n=p.trash; p.reserve+=n; p.trash=0;
+    log(i,`リフレッシュ：トラッシュ ${n} → リザーブ`);
+  }
+
+  if(p.soul==="トラッシュ"){
+    p.soul="リザーブ";
+    log(i,"リフレッシュ：ソウルコア → リザーブ");
+  }
+
+  const skipCore = (i===state.first && p.turns===1);
+  if(!skipCore){
+    p.reserve += 1;
+    log(i,"コアステップ：通常コア +1");
+  } else {
+    log(i,"先攻1ターン目：コアステップなし");
+  }
+
+  log(i,`ターン${p.turns}開始`);
+  save(); render();
+  toast(`${displayName(i)}：1枚ドロー → 全カード回復${skipCore?"（先攻1Tはコア増加なし）":""}`);
+}
+function soulChange(i,v){state.p[i].soul=v;log(i,`ソウルコア → ${v}`);save();render();}
+function rename(i,v){state.name[i]=v;save();render();}
+function swapFirst(){state.first=1-state.first;save();render();toast(`先攻：${displayName(state.first)}`)}
+function clearLog(i){state.p[i].log=[];save();render();}
+function newGame(){
+  const names=[...state.name]; const first=state.first;
+  state=defaults(); state.name=names; state.first=first;
+  save();render();toast("対戦状態を初期化しました");
+}
+function hardReset(){
+  state=defaults(); save();render();toast("初期状態に戻しました");
+}
+function soulZoneForKey(key){
+  return ({reserve:"リザーブ",trash:"トラッシュ",field:"フィールド",life:"ライフ"})[key] || "";
+}
+function zoneCard(i,key,title){
+  const p=state.p[i];
+  const soulHere = p.soul === soulZoneForKey(key);
+  return `<div class="counter">
+    <div class="label">${title}</div>
+    <div class="value">C${p[key]}${soulHere ? ' <span style="font-size:.62em;color:var(--accent)">SC1</span>' : ''}</div>
+    <div class="ctrl">
+      <button class="voidplus" onclick="adj(${i},'${key}',1)">ボイドから ＋1</button>
+    </div>
+  </div>`;
+}
+function renderPlayer(i){
+  const p=state.p[i];
+  return `<section class="player">
+    <div class="head">
+      <input class="name" aria-label="P${i+1}のデッキ名" placeholder="デッキ名" value="${esc(state.name[i])}" onchange="rename(${i},this.value)" />
+      <div class="badge">${i===state.first?"先攻":"後攻"} / T${p.turns}</div>
+    </div>
+
+    <div class="bigrow">
+      ${zoneCard(i,"reserve","リザーブ")}
+      ${zoneCard(i,"trash","トラッシュ")}
+      ${zoneCard(i,"field","場コア（任意）")}
+      ${zoneCard(i,"life","ライフ")}
+    </div>
+
+    <div class="soul">
+      <div class="soulgrid">
+        <div>
+          <div class="label">ソウルコアの場所</div>
+          <select onchange="soulChange(${i},this.value)">
+            ${ZONES.map(z=>`<option ${p.soul===z?"selected":""}>${z}</option>`).join("")}
+          </select>
+        </div>
+        <div style="font-size:24px">◉</div>
+      </div>
+    </div>
+
+    <button class="turnbtn primary" onclick="turnStart(${i})">▶ ${esc(displayName(i))} ターン開始</button>
+
+    <div class="mainmoves">
+      <button onclick="move(${i},'reserve','trash')">リザーブ<br>↓<br>トラッシュ</button>
+      <button onclick="move(${i},'field','trash')">場<br>↓<br>トラッシュ</button>
+      <button onclick="move(${i},'reserve','field')">リザーブ<br>↓<br>場</button>
+      <button onclick="move(${i},'field','reserve')">場<br>↓<br>リザーブ</button>
+      <button onclick="move(${i},'life','reserve')">ライフ<br>↓<br>リザーブ</button>
+    </div>
+    <div class="quick secondary">
+      <button onclick="move(${i},'trash','reserve')">トラッシュ → リザーブ</button>
+    </div>
+
+    <div class="log">
+      <div class="logtitle"><b>直近ログ</b><button class="small" onclick="clearLog(${i})">消す</button></div>
+      <div class="logitems">${p.log.length?p.log.map(x=>`<div>${esc(x)}</div>`).join(""):`<div style="color:var(--muted)">まだ操作なし</div>`}</div>
+    </div>
+  </section>`;
+}
+function render(){
+  document.getElementById("players").innerHTML=renderPlayer(0)+renderPlayer(1);
+}
+render();
+</script>
+</body>
+</html>
