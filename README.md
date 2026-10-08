@@ -2,6 +2,12 @@
 
 バトルスピリッツの一人回しで、2つのデッキのコアを管理する非公式の補助ツールです。Androidアプリ版と、ブラウザーで使うHTML版があります。
 
+## ブラウザーですぐ使う
+
+**[バトスピ コアヘルパーを開く](https://tsmskwri-gif.github.io/battlespirits-core-helper/)**
+
+インストール不要です。スマートフォンやPCのブラウザーで開いて使えます。開くときはインターネット接続が必要です。オフラインで使う場合は、下のAPK版またはHTML版をダウンロードしてください。
+
 ## ダウンロード
 
 - **[Android版 APKをダウンロード](https://github.com/tsmskwri-gif/battlespirits-core-helper/releases/latest/download/BattleSpiritsCoreHelper.apk)**
@@ -44,7 +50,7 @@ Android 6.0以上が対象です。Pixelで起動・操作・再起動後の保�
 
 ## 保存データについて
 
-保存先は端末内です。Android版とHTML版、異なる端末・ブラウザーの間でデータは共有されません。
+保存先は端末内です。Web版・Android版・ダウンロードしたHTML版、異なる端末・ブラウザーの間でデータは共有されません。
 
 アプリのアンインストールやデータ消去、ブラウザーの保存データ消去をすると、保存していた状態も失われます。
 
